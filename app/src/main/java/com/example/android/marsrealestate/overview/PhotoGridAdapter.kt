@@ -16,3 +16,14 @@
  */
 
 package com.example.android.marsrealestate.overview
+
+
+//class PhotoGridAdapter :ListAdapter<MarsProperty , MarsPropertyViewHolder>(DiffCallBack) {
+//    object DiffCallBack {
+//
+//    }
+//
+//    class MarsPropertyViewHolder {
+//
+//    }
+//}
