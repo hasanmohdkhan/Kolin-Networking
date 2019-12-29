@@ -30,13 +30,14 @@ import kotlinx.coroutines.launch
 /**
  * The [ViewModel] that is attached to the [OverviewFragment].
  */
+enum class MarsApiStatus { LOADING, ERROR, DONE }
 class OverviewViewModel : ViewModel() {
 
     // The internal MutableLiveData String that stores the status of the most recent request
-    private val _status = MutableLiveData<String>()
-
+    //private val _status = MutableLiveData<String>()
+    private val _status = MutableLiveData<MarsApiStatus>()
     // The external immutable LiveData for the request status String
-    val status: LiveData<String>
+    val status: LiveData<MarsApiStatus>
         get() = _status
 
     // encapsulated LiveData<MarsProperty> properties:
@@ -58,6 +59,28 @@ class OverviewViewModel : ViewModel() {
         getMarsRealEstateProperties()
     }
 
+    private val _navigateToSelectedProperty = MutableLiveData<MarsProperty>()
+
+    val navigateToSelectedProperty: LiveData<MarsProperty>
+        get() = _navigateToSelectedProperty
+
+    /*Add a function to set _navigateToSelectedProperty to marsProperty and
+      initiate navigation to the detail screen on button click:
+    */
+    fun displayPropertyDetails(marsProperty: MarsProperty) {
+        _navigateToSelectedProperty.value = marsProperty
+    }
+    /*
+    * and you'll need to add displayPropertyDetailsComplete() to
+    * set _navigateToSelectedProperty to false once navigation is
+    * completed to prevent unwanted extra navigations:
+    *
+    * */
+    fun displayPropertyDetailsComplete() {
+        _navigateToSelectedProperty.value = null
+    }
+
+
     /**
      * Sets the value of the status LiveData to the Mars API status.
      */
@@ -67,14 +90,18 @@ class OverviewViewModel : ViewModel() {
 
         var getPropertyDeffered  = MarsApi.retrofitService.getProperties()
             try {
-                var listResult = getPropertyDeffered.await()
+                _status.value = MarsApiStatus.LOADING
 
-                if(listResult.size > 0 ){
-                    _properties.value = listResult
-                }
-            }catch (e : Throwable){
-                _status.value = "Failure: " + e.message
+                val listResult =  getPropertyDeffered.await()
+                _status.value = MarsApiStatus.DONE
+                _properties.value = listResult
+            } catch (e: Exception) {
+                _status.value = MarsApiStatus.ERROR
+                _properties.value = ArrayList()
             }
+
+
+
         }
 
     }
